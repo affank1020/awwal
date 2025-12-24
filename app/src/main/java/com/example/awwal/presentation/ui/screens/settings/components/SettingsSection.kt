@@ -1,0 +1,19 @@
+package com.example.awwal.presentation.ui.screens.settings.components
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Text(text = title, style = MaterialTheme.typography.titleLarge)
+    Spacer(modifier = Modifier.height(8.dp))
+    Column(content = content)
+    Spacer(modifier = Modifier.height(16.dp))
+}
