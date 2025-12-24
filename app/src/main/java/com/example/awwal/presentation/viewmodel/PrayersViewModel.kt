@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.awwal.domain.PrayerRepository
 import com.example.awwal.domain.classes.PrayerData
 import com.example.awwal.domain.classes.enums.PrayerStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,9 +29,14 @@ class PrayersViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    private var loadPrayersJob: kotlinx.coroutines.Job? = null
+
     // Load prayers for a specific date
     fun loadPrayersForDate(date: LocalDate) {
-        viewModelScope.launch {
+        // Cancel previous collection to prevent multiple Flows from racing
+        loadPrayersJob?.cancel()
+
+        loadPrayersJob = viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
@@ -74,12 +80,6 @@ class PrayersViewModel(
         }
     }
 
-    // Toggle prayer completion for today (used in HomeScreen checkboxes)
-    fun togglePrayerCompletion(prayerName: String, isCompleted: Boolean) {
-        val status = if (isCompleted) PrayerStatus.PRAYED else PrayerStatus.EMPTY
-        updatePrayerStatus(prayerName, LocalDate.now(), status)
-    }
-
     // Save all 5 prayers for a day
     fun savePrayersForDay(date: LocalDate, prayers: List<PrayerData>) {
         viewModelScope.launch {
@@ -107,18 +107,6 @@ class PrayersViewModel(
         return _prayersForDate.value.find {
             it.prayerName == prayerName && it.date == date
         }
-    }
-
-    // Initialize with mock data for testing
-    fun initializeMockData(date: LocalDate) {
-        val mockPrayers = listOf(
-            PrayerData("Fajr", date, PrayerStatus.PRAYED),
-            PrayerData("Dhuhr", date, PrayerStatus.PRAYED),
-            PrayerData("Asr", date, PrayerStatus.LATE),
-            PrayerData("Maghrib", date, PrayerStatus.PRAYED),
-            PrayerData("Isha", date, PrayerStatus.MISSED)
-        )
-        savePrayersForDay(date, mockPrayers)
     }
 
     // Clear error message

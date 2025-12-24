@@ -54,9 +54,7 @@ fun HomeScreen(
     )
 
     // Create prayer map for quick lookup
-    val prayerStatusMap = remember(prayersFromDb) {
-        prayersFromDb.associateBy { it.prayerName }
-    }
+    val prayerStatusMap = prayersFromDb.associateBy { it.prayerName }
 
     Box(
         modifier = modifier

@@ -1,6 +1,5 @@
 package com.example.awwal.presentation.viewmodel
 
-import android.R
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
