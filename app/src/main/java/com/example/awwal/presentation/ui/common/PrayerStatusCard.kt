@@ -25,6 +25,7 @@ val PrayerStatus.label: String
         PrayerStatus.LATE -> "Late"
         PrayerStatus.MISSED -> "Missed"
         PrayerStatus.EMPTY -> "Not Set"
+        else -> {"Note Set"}
     }
 
 val PrayerStatus.color: Color
@@ -33,6 +34,7 @@ val PrayerStatus.color: Color
         PrayerStatus.LATE -> Color(0xFFFFC107) // Amber
         PrayerStatus.MISSED -> Color(0xFFF44336) // Red
         PrayerStatus.EMPTY -> Color(0xFF9E9E9E) // Grey
+        else -> Color.Gray
     }
 
 @Composable

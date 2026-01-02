@@ -17,17 +17,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.DateNavigator
 import com.example.awwal.presentation.ui.screens.home.components.PrayerItem
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
-
-data class Prayer(
-    val name: String,
-    val time: String = "-- : --",
-    val isCompleted: Boolean = false
-)
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -63,8 +58,9 @@ fun HomeScreen(
                 brush = Brush.verticalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surface
-                    )
+                        MaterialTheme.colorScheme.surface,
+                    ),
+                    startY = 1000f,
                 )
             )
     ) {
@@ -77,37 +73,22 @@ fun HomeScreen(
                 DateNavigator(
                     currentDate = currentDate,
                     onPreviousDay = { currentDate = currentDate.minusDays(1) },
-                    onNextDay = { currentDate = currentDate.plusDays(1) }
+                    onNextDay = { currentDate = currentDate.plusDays(1) },
+                    onDateSelected = { selectedDate -> currentDate = selectedDate },
                 )
             }
 
-            // Prayer Section Title
-            item {
-                Text(
-                    text = "Daily Prayers",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                )
-            }
-
-            // Prayer Items
             items(prayerNames) { prayerName ->
-                val isCompleted = prayerStatusMap[prayerName]?.prayerStatus?.name == "PRAYED"
-
                 PrayerItem(
                     prayerName = prayerName,
                     prayerTime = prayerTimes[prayerName] ?: "-- : --",
-                    checked = isCompleted,
-                    onCheckedChange = { isChecked ->
-                        // Update prayer completion in database for the selected date
+                    currentStatus = prayerStatusMap[prayerName]?.prayerStatus
+                        ?: PrayerStatus.EMPTY,
+                    onStatusChange = { newStatus ->
                         viewModel.updatePrayerStatus(
                             prayerName = prayerName,
                             date = currentDate,
-                            newStatus = if (isChecked)
-                                com.example.awwal.domain.classes.enums.PrayerStatus.PRAYED
-                            else
-                                com.example.awwal.domain.classes.enums.PrayerStatus.EMPTY
+                            newStatus = newStatus
                         )
                     }
                 )
