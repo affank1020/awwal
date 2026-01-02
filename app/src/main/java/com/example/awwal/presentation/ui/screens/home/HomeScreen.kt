@@ -148,11 +148,11 @@ fun HomeScreen(
                     item {
                         DateNavigator(
                             currentDate = animatedDate,
-                            onPreviousDay = {
+                            onPrevious = {
                                 slideDirection = DateSlideDirection.RIGHT
                                 currentDate = animatedDate.minusDays(1)
                             },
-                            onNextDay = {
+                            onNext = {
                                 slideDirection = DateSlideDirection.LEFT
                                 currentDate = animatedDate.plusDays(1)
                             },

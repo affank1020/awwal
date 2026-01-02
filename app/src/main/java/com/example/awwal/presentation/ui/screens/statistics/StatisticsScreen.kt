@@ -61,8 +61,8 @@ fun StatisticsScreen(
 
         DateNavigator(
             currentDate = currentDate,
-            onPreviousDay = { currentDate = currentDate.minusDays(1) },
-            onNextDay = { currentDate = currentDate.plusDays(1) },
+            onPrevious = { currentDate = currentDate.minusDays(1) },
+            onNext = { currentDate = currentDate.plusDays(1) },
             onDateSelected = { selectedDate -> currentDate = selectedDate },
         )
 
