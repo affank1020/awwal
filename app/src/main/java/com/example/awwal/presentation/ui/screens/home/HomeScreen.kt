@@ -2,54 +2,87 @@ package com.example.awwal.presentation.ui.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.example.awwal.domain.classes.PrayerData
 import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.date.DateNavigator
 import com.example.awwal.presentation.ui.screens.home.components.prayerItem.PrayerItem
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
 
-private enum class DateSlideDirection { LEFT, RIGHT }
-
-@OptIn(ExperimentalAnimationApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: PrayersViewModel = koinViewModel()
 ) {
-    var currentDate by remember { mutableStateOf(LocalDate.now()) }
-    var lastDate by remember { mutableStateOf(currentDate) }
-    var slideDirection by remember { mutableStateOf(DateSlideDirection.LEFT) }
-    val prayersFromDb by viewModel.prayersForDate.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-    // Load prayers when date changes
-    LaunchedEffect(currentDate) {
-        viewModel.loadPrayersForDate(currentDate)
+    // Use a large number for "infinite" scrolling, with today in the middle
+    val totalPages = 10000
+    val startPage = totalPages / 2
+    val pagerState = rememberPagerState(initialPage = startPage) { totalPages }
+
+    // Calculate date based on page offset from start
+    fun pageToDate(page: Int): LocalDate = LocalDate.now().plusDays((page - startPage).toLong())
+    fun dateToPage(date: LocalDate): Int = startPage + LocalDate.now().until(date).days
+
+    // Cache prayer data for multiple pages
+    val prayerCache = remember { mutableStateMapOf<LocalDate, List<PrayerData>>() }
+
+    // Collect from ViewModel and update cache
+    val prayersFromDb by viewModel.prayersForDate.collectAsState()
+    val currentLoadedDate by viewModel.currentLoadedDate.collectAsState()
+
+    // Update cache when data is loaded
+    LaunchedEffect(prayersFromDb, currentLoadedDate) {
+        currentLoadedDate?.let { date ->
+            prayerCache[date] = prayersFromDb
+        }
+    }
+
+    // Preload adjacent pages
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .collect { page ->
+                // Load current page
+                val currentDate = pageToDate(page)
+                viewModel.loadPrayersForDate(currentDate)
+
+                // Preload previous and next pages
+                val prevDate = pageToDate(page - 1)
+                val nextDate = pageToDate(page + 1)
+                if (!prayerCache.containsKey(prevDate)) {
+                    viewModel.loadPrayersForDateIntoCache(prevDate) { prayers ->
+                        prayerCache[prevDate] = prayers
+                    }
+                }
+                if (!prayerCache.containsKey(nextDate)) {
+                    viewModel.loadPrayersForDateIntoCache(nextDate) { prayers ->
+                        prayerCache[nextDate] = prayers
+                    }
+                }
+            }
     }
 
     // TODO: Replace with actual prayer times from API
@@ -61,19 +94,6 @@ fun HomeScreen(
         "Maghrib" to "06:20 PM",
         "Isha" to "08:00 PM"
     )
-
-    // Create prayer map for quick lookup
-    val prayerStatusMap = prayersFromDb.associateBy { it.prayerName }
-
-    // Determine animation direction
-    LaunchedEffect(currentDate) {
-        slideDirection = when {
-            currentDate.isAfter(lastDate) -> DateSlideDirection.LEFT
-            currentDate.isBefore(lastDate) -> DateSlideDirection.RIGHT
-            else -> DateSlideDirection.LEFT
-        }
-        lastDate = currentDate
-    }
 
     Box(
         modifier = modifier
@@ -87,102 +107,80 @@ fun HomeScreen(
                     startY = 1000f,
                 )
             )
-            .pointerInput(currentDate) {
-                detectDragGestures(
-                    onDragEnd = {
-                        // handled in dragAmount logic
-                    },
-                    onDrag = { change, dragAmount ->
-                        // handled in drag logic below
-                    },
-                    onDragStart = {},
-                    onDragCancel = {}
-                )
-            }
     ) {
-        // Custom drag logic for intuitive swipe
-        var accumulatedDrag by remember { mutableStateOf(0f) }
-        val swipeThreshold = 80f
-        Box(
-            Modifier.pointerInput(currentDate) {
-                detectDragGestures(
-                    onDragStart = {
-                        accumulatedDrag = 0f
-                    },
-                    onDrag = { change, dragAmount ->
-                        accumulatedDrag += dragAmount.x
-                    },
-                    onDragEnd = {
-                        if (accumulatedDrag > swipeThreshold) {
-                            // Swipe right: go to previous day
-                            slideDirection = DateSlideDirection.RIGHT
-                            currentDate = currentDate.minusDays(1)
-                        } else if (accumulatedDrag < -swipeThreshold) {
-                            // Swipe left: go to next day
-                            slideDirection = DateSlideDirection.LEFT
-                            currentDate = currentDate.plusDays(1)
-                        }
-                        accumulatedDrag = 0f
-                    }
-                )
-            }
-        ) {
-            val directionState = rememberUpdatedState(slideDirection)
-            AnimatedContent(
-                targetState = currentDate,
-                transitionSpec = {
-                    if (directionState.value == DateSlideDirection.LEFT) {
-                        slideInHorizontally(initialOffsetX = { fullWidth -> fullWidth }) togetherWith
-                                slideOutHorizontally(targetOffsetX = { fullWidth -> -fullWidth })
-                    } else {
-                        slideInHorizontally(initialOffsetX = { fullWidth -> -fullWidth }) togetherWith
-                                slideOutHorizontally(targetOffsetX = { fullWidth -> fullWidth })
-                    }
-                }
-            ) { animatedDate ->
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        DateNavigator(
-                            currentDate = animatedDate,
-                            onPrevious = {
-                                slideDirection = DateSlideDirection.RIGHT
-                                currentDate = animatedDate.minusDays(1)
-                            },
-                            onNext = {
-                                slideDirection = DateSlideDirection.LEFT
-                                currentDate = animatedDate.plusDays(1)
-                            },
-                            onDateSelected = { selectedDate ->
-                                slideDirection = if (selectedDate.isAfter(animatedDate)) DateSlideDirection.LEFT else DateSlideDirection.RIGHT
-                                currentDate = selectedDate
-                            },
-                        )
-                    }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            val pageDate = pageToDate(page)
 
-                    items(prayerNames) { prayerName ->
-                        PrayerItem(
-                            prayerName = prayerName,
-                            prayerTime = prayerTimes[prayerName] ?: "-- : --",
-                            currentStatus = prayerStatusMap[prayerName]?.prayerStatus
-                                ?: PrayerStatus.EMPTY,
-                            onStatusChange = { newStatus ->
-                                viewModel.updatePrayerStatus(
-                                    prayerName = prayerName,
-                                    date = animatedDate,
-                                    newStatus = newStatus
+            // Get cached prayer data for this page
+            val pagePrayers = prayerCache[pageDate] ?: emptyList()
+            val prayerStatusMap = pagePrayers.associateBy { it.prayerName }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    DateNavigator(
+                        currentDate = pageDate,
+                        onPrevious = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(
+                                    page - 1,
+                                    animationSpec = tween(durationMillis = 500)
                                 )
                             }
-                        )
-                    }
+                        },
+                        onNext = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(
+                                    page + 1,
+                                    animationSpec = tween(durationMillis = 500)
+                                )
+                            }
+                        },
+                        onDateSelected = { selectedDate ->
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(
+                                    dateToPage(selectedDate),
+                                    animationSpec = tween(durationMillis = 500)
+                                )
+                            }
+                        },
+                    )
+                }
 
-                    // Bottom spacing
-                    item {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                items(prayerNames) { prayerName ->
+                    PrayerItem(
+                        prayerName = prayerName,
+                        prayerTime = prayerTimes[prayerName] ?: "-- : --",
+                        currentStatus = prayerStatusMap[prayerName]?.prayerStatus
+                            ?: PrayerStatus.EMPTY,
+                        onStatusChange = { newStatus ->
+                            viewModel.updatePrayerStatus(
+                                prayerName = prayerName,
+                                date = pageDate,
+                                newStatus = newStatus
+                            )
+                            // Update cache immediately for responsive UI
+                            val currentList = prayerCache[pageDate]?.toMutableList() ?: mutableListOf()
+                            val existingIndex = currentList.indexOfFirst { it.prayerName == prayerName }
+                            val updatedPrayer = PrayerData(prayerName, pageDate, newStatus)
+                            if (existingIndex >= 0) {
+                                currentList[existingIndex] = updatedPrayer
+                            } else {
+                                currentList.add(updatedPrayer)
+                            }
+                            prayerCache[pageDate] = currentList
+                        }
+                    )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }

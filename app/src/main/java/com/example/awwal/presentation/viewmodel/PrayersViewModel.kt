@@ -19,6 +19,9 @@ class PrayersViewModel(
     private val _prayersForDate = MutableStateFlow<List<PrayerData>>(emptyList())
     val prayersForDate: StateFlow<List<PrayerData>> = _prayersForDate.asStateFlow()
 
+    private val _currentLoadedDate = MutableStateFlow<LocalDate?>(null)
+    val currentLoadedDate: StateFlow<LocalDate?> = _currentLoadedDate.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
@@ -35,6 +38,7 @@ class PrayersViewModel(
         loadPrayersJob = viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
+            _currentLoadedDate.value = date
             try {
                 prayerRepository.getPrayersForDateFlow(date).collect { prayers ->
                     _prayersForDate.value = prayers
@@ -44,6 +48,19 @@ class PrayersViewModel(
                 _prayersForDate.value = emptyList()
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    // Load prayers for a date into a cache callback (for preloading adjacent pages)
+    fun loadPrayersForDateIntoCache(date: LocalDate, onLoaded: (List<PrayerData>) -> Unit) {
+        viewModelScope.launch {
+            try {
+                prayerRepository.getPrayersForDateFlow(date).collect { prayers ->
+                    onLoaded(prayers)
+                }
+            } catch (e: Exception) {
+                onLoaded(emptyList())
             }
         }
     }
