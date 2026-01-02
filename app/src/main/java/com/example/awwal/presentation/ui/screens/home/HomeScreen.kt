@@ -38,14 +38,12 @@ fun HomeScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    // Use a large number for "infinite" scrolling, with today in the middle
-    val totalPages = 10000
-    val startPage = totalPages / 2
-    val pagerState = rememberPagerState(initialPage = startPage) { totalPages }
+    val totalPages = 10000 // Large number to allow extensive scrolling
+    val todayPage = totalPages / 2
+    val pagerState = rememberPagerState(initialPage = todayPage) { todayPage + 1 } // Only allow up to today
 
-    // Calculate date based on page offset from start
-    fun pageToDate(page: Int): LocalDate = LocalDate.now().plusDays((page - startPage).toLong())
-    fun dateToPage(date: LocalDate): Int = startPage + LocalDate.now().until(date).days
+    fun pageToDate(page: Int): LocalDate = LocalDate.now().plusDays((page - todayPage).toLong())
+    fun dateToPage(date: LocalDate): Int = todayPage + LocalDate.now().until(date).days
 
     // Cache prayer data for multiple pages
     val prayerCache = remember { mutableStateMapOf<LocalDate, List<PrayerData>>() }
@@ -126,26 +124,30 @@ fun HomeScreen(
                 item {
                     DateNavigator(
                         currentDate = pageDate,
+                        showNext = page < todayPage,
                         onPrevious = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(
-                                    page - 1,
+                                    (page - 1).coerceAtLeast(0),
                                     animationSpec = tween(durationMillis = 500)
                                 )
                             }
                         },
-                        onNext = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(
-                                    page + 1,
-                                    animationSpec = tween(durationMillis = 500)
-                                )
+                        onNext = if (page < todayPage) {
+                            {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(
+                                        (page + 1).coerceAtMost(todayPage),
+                                        animationSpec = tween(durationMillis = 500)
+                                    )
+                                }
                             }
-                        },
+                        } else null,
                         onDateSelected = { selectedDate ->
+                            val targetPage = dateToPage(selectedDate).coerceAtMost(todayPage)
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(
-                                    dateToPage(selectedDate),
+                                    targetPage,
                                     animationSpec = tween(durationMillis = 500)
                                 )
                             }

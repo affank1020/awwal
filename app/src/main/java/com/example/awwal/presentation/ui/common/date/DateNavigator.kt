@@ -1,6 +1,7 @@
 package com.example.awwal.presentation.ui.common.date
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -36,23 +37,26 @@ import java.time.format.DateTimeFormatter
 fun DateNavigator(
     currentDate: LocalDate,
     modifier: Modifier = Modifier,
+    showNext: Boolean = true,
     onPrevious: () -> Unit,
-    onNext: () -> Unit,
+    onNext: (() -> Unit)? = null,
     onDateSelected: (LocalDate) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
-    // Sync DatePicker state with currentDate
+    val todayMillis = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        initialSelectedDateMillis = currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+        selectableDates = object : androidx.compose.material3.SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= todayMillis
+        }
     )
 
-    // Update DatePicker when currentDate changes externally
     LaunchedEffect(currentDate) {
         datePickerState.selectedDateMillis = currentDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
     }
 
-    // Handle date selection from DatePicker
     fun handleDateSelected() {
         datePickerState.selectedDateMillis?.let { millis ->
             val selectedDate = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
@@ -63,8 +67,7 @@ fun DateNavigator(
         showDialog = false
     }
 
-    // Top Row: Navigation Arrows and Date Text
-    androidx.compose.foundation.layout.Row(
+    Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
@@ -76,7 +79,7 @@ fun DateNavigator(
             )
         }
 
-        androidx.compose.foundation.layout.Row(
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .clickable { showDialog = true }
@@ -92,11 +95,13 @@ fun DateNavigator(
             )
         }
 
-        IconButton(onClick = onNext) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Next"
-            )
+        if (showNext && onNext != null) {
+            IconButton(onClick = onNext) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Next"
+                )
+            }
         }
     }
 
