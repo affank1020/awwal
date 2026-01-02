@@ -22,6 +22,7 @@ import com.example.awwal.domain.classes.enums.PrayerStatus
 val PrayerStatus.label: String
     get() = when (this) {
         PrayerStatus.PRAYED -> "Prayed"
+        PrayerStatus.JAMAAH -> "Jamaah"
         PrayerStatus.LATE -> "Late"
         PrayerStatus.MISSED -> "Missed"
         PrayerStatus.EMPTY -> "Not Set"
@@ -31,6 +32,7 @@ val PrayerStatus.label: String
 val PrayerStatus.color: Color
     get() = when (this) {
         PrayerStatus.PRAYED -> Color(0xFF4CAF50) // Green
+        PrayerStatus.JAMAAH -> Color(0xFF2196F3) // Blue
         PrayerStatus.LATE -> Color(0xFFFFC107) // Amber
         PrayerStatus.MISSED -> Color(0xFFF44336) // Red
         PrayerStatus.EMPTY -> Color(0xFF9E9E9E) // Grey
@@ -82,4 +84,3 @@ fun StatusBadge(status: PrayerStatus) {
         )
     }
 }
-

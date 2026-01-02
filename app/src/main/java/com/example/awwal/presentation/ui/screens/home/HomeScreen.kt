@@ -28,7 +28,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.date.DateNavigator
-import com.example.awwal.presentation.ui.screens.home.components.PrayerItem
+import com.example.awwal.presentation.ui.screens.home.components.prayerItem.PrayerItem
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
