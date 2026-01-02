@@ -12,10 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-/**
- * Shared ViewModel for managing prayer data across multiple screens
- * Used by: HomeScreen, StatisticsScreen, and any other screen that needs prayer data
- */
 class PrayersViewModel(
     private val prayerRepository: PrayerRepository
 ) : ViewModel() {
@@ -50,11 +46,6 @@ class PrayersViewModel(
                 _isLoading.value = false
             }
         }
-    }
-
-    // Load prayers for today (convenience method for HomeScreen)
-    fun loadTodaysPrayers() {
-        loadPrayersForDate(LocalDate.now())
     }
 
     // Save a single prayer
