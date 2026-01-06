@@ -1,10 +1,7 @@
-package com.example.awwal.presentation.ui.screens.home.components.prayerItem
+package com.example.awwal.presentation.ui.screens.home.components.prayer
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,7 +11,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
-import com.example.awwal.presentation.ui.common.buttons.PrayerStatusButton
 import com.example.awwal.presentation.ui.screens.getPrayerColors
 import com.example.awwal.presentation.ui.screens.getPrayerIcons
 import com.example.awwal.presentation.ui.screens.getPrayerLabels

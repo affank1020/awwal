@@ -33,6 +33,7 @@ fun PrayerStatusButton(
     val buttonColor = if (isSelected) color.copy(alpha = 0.5f) else Color.Transparent
     val borderColor = color
     val buttonSize = 72.dp
+
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.size(buttonSize),

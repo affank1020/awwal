@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.date.DateNavigator
-import com.example.awwal.presentation.ui.common.PrayerStatusCard
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
@@ -73,43 +72,6 @@ fun StatisticsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Convert database prayers to display format
-            val displayData = prayers.toDailyPrayerData(currentDate)
-
-            PrayerStatusCard(
-                prayerName = "Fajr",
-                status = displayData.fajr,
-                onClick = {
-                    viewModel.updatePrayerStatus("Fajr", currentDate, PrayerStatus.PRAYED)
-                }
-            )
-            PrayerStatusCard(
-                prayerName = "Dhuhr",
-                status = displayData.dhuhr,
-                onClick = {
-                    viewModel.updatePrayerStatus("Dhuhr", currentDate, PrayerStatus.PRAYED)
-                }
-            )
-            PrayerStatusCard(
-                prayerName = "Asr",
-                status = displayData.asr,
-                onClick = {
-                    viewModel.updatePrayerStatus("Asr", currentDate, PrayerStatus.PRAYED)
-                }
-            )
-            PrayerStatusCard(
-                prayerName = "Maghrib",
-                status = displayData.maghrib,
-                onClick = {
-                    viewModel.updatePrayerStatus("Maghrib", currentDate, PrayerStatus.PRAYED)
-                }
-            )
-            PrayerStatusCard(
-                prayerName = "Isha",
-                status = displayData.isha,
-                onClick = {
-                    viewModel.updatePrayerStatus("Isha", currentDate, PrayerStatus.PRAYED)
-                }
-            )
         }
     }
 }
