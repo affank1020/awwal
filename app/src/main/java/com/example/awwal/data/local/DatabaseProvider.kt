@@ -8,7 +8,7 @@ object DatabaseProvider {
     private var INSTANCE: AppDatabase? = null
 
     fun getDatabase(context: Context): AppDatabase {
-        return INSTANCE ?: synchronized(this) {
+        return INSTANCE ?: synchronized(this) { // Check if the instance already exists
             val instance = Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
@@ -22,3 +22,4 @@ object DatabaseProvider {
     }
 }
 
+//TODO: Add migrations later

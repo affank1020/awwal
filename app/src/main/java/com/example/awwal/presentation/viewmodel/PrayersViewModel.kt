@@ -27,16 +27,13 @@ class PrayersViewModel(
     val currentLoadedDate: StateFlow<LocalDate?> = _currentLoadedDate.asStateFlow()
 
     private val _prayerTimes = MutableStateFlow<PrayerTimes?>(null)
-    val prayerTimes: StateFlow<PrayerTimes?> = _prayerTimes.asStateFlow()
 
     private val _prayerTimesMap = MutableStateFlow<Map<String, String>>(emptyMap())
     val prayerTimesMap: StateFlow<Map<String, String>> = _prayerTimesMap.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
 
     private var loadPrayersJob: kotlinx.coroutines.Job? = null
 
@@ -86,17 +83,6 @@ class PrayersViewModel(
                 }
             } catch (e: Exception) {
                 onLoaded(emptyList())
-            }
-        }
-    }
-
-    // Save a single prayer
-    fun savePrayer(prayerData: PrayerData) {
-        viewModelScope.launch {
-            try {
-                prayerRepository.savePrayerData(prayerData)
-            } catch (e: Exception) {
-                _error.value = "Failed to save prayer: ${e.message}"
             }
         }
     }
@@ -193,39 +179,5 @@ class PrayersViewModel(
         } catch (e: Exception) {
             null
         }
-    }
-
-    // Save all 5 prayers for a day
-    fun savePrayersForDay(date: LocalDate, prayers: List<PrayerData>) {
-        viewModelScope.launch {
-            try {
-                prayerRepository.savePrayersForDay(date, prayers)
-            } catch (e: Exception) {
-                _error.value = "Failed to save prayers: ${e.message}"
-            }
-        }
-    }
-
-    // Delete prayers for a specific date
-    fun deletePrayersForDate(date: LocalDate) {
-        viewModelScope.launch {
-            try {
-                prayerRepository.deletePrayersForDate(date)
-            } catch (e: Exception) {
-                _error.value = "Failed to delete prayers: ${e.message}"
-            }
-        }
-    }
-
-    // Get a specific prayer for a date
-    fun getPrayerByName(prayerName: String, date: LocalDate): PrayerData? {
-        return _prayersForDate.value.find {
-            it.prayerName == prayerName && it.date == date
-        }
-    }
-
-    // Clear error message
-    fun clearError() {
-        _error.value = null
     }
 }

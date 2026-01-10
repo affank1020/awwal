@@ -9,7 +9,7 @@ import com.example.awwal.data.local.entity.PrayerDataEntity
 @Database(
     entities = [PrayerDataEntity::class],
     version = 3,
-    exportSchema = true
+    exportSchema = true //TODO: Figure out where this file is
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {

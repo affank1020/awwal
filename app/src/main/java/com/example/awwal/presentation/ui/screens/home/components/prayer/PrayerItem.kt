@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
-import com.example.awwal.presentation.ui.screens.getPrayerColors
-import com.example.awwal.presentation.ui.screens.getPrayerIcons
-import com.example.awwal.presentation.ui.screens.getPrayerLabels
+import com.example.awwal.getPrayerColors
+import com.example.awwal.getPrayerIcons
+import com.example.awwal.getPrayerLabels
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter

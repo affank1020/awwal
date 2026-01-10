@@ -1,7 +1,5 @@
 package com.example.awwal.presentation.ui.screens.home
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,7 +28,6 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -96,7 +93,6 @@ fun HomeScreen(
             totalPages = pagingState.totalPages,
             todayPage = pagingState.todayPage,
             pageToDate = { pagingState.pageToDate(it) },
-            dateToPage = { pagingState.dateToPage(it) },
             modifier = Modifier.fillMaxSize()
         ) { pageDate, page, pagerState ->
             val coroutineScope = rememberCoroutineScope()

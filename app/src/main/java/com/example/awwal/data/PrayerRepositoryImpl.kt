@@ -13,16 +13,6 @@ class PrayerRepositoryImpl(private val context: Context): PrayerRepository {
     private val database = DatabaseProvider.getDatabase(context)
     private val prayerDao = database.prayerDao()
 
-    override suspend fun fetchPrayerForDay(date: String): PrayerData {
-        val localDate = LocalDate.parse(date)
-        val prayers = prayerDao.getPrayersForDateOnce(localDate)
-
-        // For now, return the first prayer found or throw an exception
-        // You might want to modify this logic based on your needs
-        return prayers.firstOrNull()?.toDomainModel()
-            ?: throw NoSuchElementException("No prayer data found for date: $date")
-    }
-
     override suspend fun savePrayerData(prayerData: PrayerData) {
         val entity = prayerData.toEntity()
         prayerDao.insertPrayer(entity)

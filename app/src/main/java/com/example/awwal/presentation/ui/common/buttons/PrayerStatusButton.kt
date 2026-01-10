@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
-import com.example.awwal.presentation.ui.screens.getPrayerColors
-import com.example.awwal.presentation.ui.screens.getPrayerIcons
-import com.example.awwal.presentation.ui.screens.getPrayerLabels
+import com.example.awwal.getPrayerColors
+import com.example.awwal.getPrayerIcons
+import com.example.awwal.getPrayerLabels
 
 @Composable
 fun PrayerStatusButton(
@@ -30,7 +30,7 @@ fun PrayerStatusButton(
     val color: Color = getPrayerColors(status)
     val label: String = getPrayerLabels(status)
 
-    val buttonColor = if (isSelected) color.copy(alpha = 0.5f) else Color.Transparent
+    val buttonColor = if (isSelected) color.copy(alpha = 0.25f) else Color.Transparent
     val borderColor = color
     val buttonSize = 72.dp
 

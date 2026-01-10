@@ -10,7 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.buttons.PrayerStatusButton
-import com.example.awwal.presentation.ui.common.dialogs.TimePickerDialog
+import com.example.awwal.presentation.ui.common.dialogs.timePicker.TimePickerDialog
 import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)

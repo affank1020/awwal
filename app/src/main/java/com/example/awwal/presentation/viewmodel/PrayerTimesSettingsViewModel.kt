@@ -19,7 +19,6 @@ class PrayerTimesSettingsViewModel(
     val settings: StateFlow<PrayerTimeSettings> = _settings.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
         loadSettings()

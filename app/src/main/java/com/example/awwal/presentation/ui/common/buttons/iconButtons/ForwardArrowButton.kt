@@ -13,7 +13,8 @@ fun ForwardArrowButton(
     modifier: Modifier = Modifier,
 ) {
     IconButton(
-        onClick = onClick
+        onClick = onClick,
+        modifier = modifier
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,

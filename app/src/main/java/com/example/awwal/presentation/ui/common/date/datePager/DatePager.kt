@@ -12,7 +12,6 @@ fun DatePager(
     totalPages: Int,
     todayPage: Int,
     pageToDate: (Int) -> LocalDate,
-    dateToPage: (LocalDate) -> Int,
     modifier: Modifier = Modifier,
     content: @Composable (date: LocalDate, page: Int, pagerState: PagerState) -> Unit
 ) {

@@ -23,7 +23,7 @@ fun DateText(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .clickable { onClick() }
             .padding(8.dp)
     ) {
