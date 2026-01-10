@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.awwal"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -44,6 +44,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.ui.graphics)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -65,6 +66,9 @@ dependencies {
     // Koin for Dependency Injection
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+
+    // Adhan for Prayer Time Calculations
+    implementation(libs.adhan)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -23,7 +23,6 @@ fun AppNavGraph() {
         ),
     )
 
-
     NavigationSuiteScaffold(
         navigationSuiteColors = NavigationSuiteDefaults.colors(
             navigationBarContainerColor = Color.Transparent,
@@ -40,10 +39,6 @@ fun AppNavGraph() {
             }
         }
     ) {
-        when (currentDestination) {
-            AppDestinations.HOME -> AppDestinations.HOME.content()
-            AppDestinations.STATISTICS -> AppDestinations.STATISTICS.content()
-            AppDestinations.SETTINGS -> AppDestinations.SETTINGS.content()
-        }
+        currentDestination.content()
     }
 }

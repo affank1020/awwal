@@ -55,7 +55,9 @@ class PrayerRepositoryImpl(private val context: Context): PrayerRepository {
         return PrayerData(
             prayerName = this.prayerName,
             date = this.date,
-            prayerStatus = this.status
+            prayerStatus = this.status,
+            timePrayed = this.timePrayed,
+            prayerWindowPercentage = this.prayerWindowPercentage
         )
     }
 
@@ -63,7 +65,9 @@ class PrayerRepositoryImpl(private val context: Context): PrayerRepository {
         return PrayerDataEntity(
             prayerName = this.prayerName,
             date = this.date,
-            status = this.prayerStatus
+            status = this.prayerStatus,
+            timePrayed = this.timePrayed,
+            prayerWindowPercentage = this.prayerWindowPercentage
         )
     }
 }

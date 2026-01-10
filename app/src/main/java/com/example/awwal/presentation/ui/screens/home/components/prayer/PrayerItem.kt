@@ -15,15 +15,22 @@ import com.example.awwal.presentation.ui.screens.getPrayerColors
 import com.example.awwal.presentation.ui.screens.getPrayerIcons
 import com.example.awwal.presentation.ui.screens.getPrayerLabels
 import kotlinx.coroutines.launch
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrayerItem(
     modifier: Modifier = Modifier,
     prayerName: String,
-    prayerTime: String = "-- : --",
+    prayerTime: String = "",
     currentStatus: PrayerStatus = PrayerStatus.EMPTY,
-    onStatusChange: (PrayerStatus) -> Unit = {}
+    timePrayed: LocalTime? = null,
+    onStatusChange: (PrayerStatus) -> Unit = {},
+    onStatusChangeWithTime: ((PrayerStatus, LocalTime?, Boolean) -> Unit)? = null, // Added isNextDay parameter
+    prayerStartTime: LocalTime? = null,
+    prayerEndTime: LocalTime? = null,
+    nextDayFajrTime: LocalTime? = null // For Isha's next day validation
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -32,6 +39,28 @@ fun PrayerItem(
     val statusColor: Color = getPrayerColors(currentStatus)
     val statusIcon: ImageVector = getPrayerIcons(currentStatus)
     val statusLabel: String = getPrayerLabels(currentStatus)
+
+    val formatter = DateTimeFormatter.ofPattern("hh:mm a")
+
+    // Determine what time text to show - changed "Starts at" to "Start time:"
+    val timeDisplayText = when {
+        currentStatus == PrayerStatus.PRAYED && timePrayed != null -> {
+            "Prayed at ${timePrayed.format(formatter)}"
+        }
+        currentStatus == PrayerStatus.JAMAAH -> {
+            "Prayed in Jamaah"
+        }
+        currentStatus == PrayerStatus.LATE -> {
+            "Prayed late"
+        }
+        currentStatus == PrayerStatus.MISSED -> {
+            "Missed"
+        }
+        prayerTime.isNotBlank() -> {
+            "Start time: $prayerTime"
+        }
+        else -> ""
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -59,16 +88,22 @@ fun PrayerItem(
             ) {
                 Text(
                     text = prayerName,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
-                Text(
-                    text = prayerTime,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.Medium
-                )
+                if (timeDisplayText.isNotBlank()) {
+                    Text(
+                        text = timeDisplayText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (currentStatus != PrayerStatus.EMPTY && currentStatus != PrayerStatus.MISSED) {
+                            statusColor
+                        } else {
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        },
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
 
             IconButton(
@@ -88,12 +123,16 @@ fun PrayerItem(
         prayerName = prayerName,
         currentStatus = currentStatus,
         onStatusChange = onStatusChange,
+        onStatusChangeWithTime = onStatusChangeWithTime,
         showSheet = showSheet,
         sheetState = sheetState,
         onDismiss = {
             coroutineScope.launch {
                 showSheet = false
             }
-        }
+        },
+        prayerStartTime = prayerStartTime,
+        prayerEndTime = prayerEndTime,
+        nextDayFajrTime = nextDayFajrTime
     )
 }

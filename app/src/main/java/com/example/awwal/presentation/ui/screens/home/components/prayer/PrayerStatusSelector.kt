@@ -3,13 +3,15 @@ package com.example.awwal.presentation.ui.screens.home.components.prayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.buttons.PrayerStatusButton
+import com.example.awwal.presentation.ui.common.dialogs.TimePickerDialog
+import java.time.LocalTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,10 +19,19 @@ fun PrayerStatusSelector(
     prayerName: String,
     currentStatus: PrayerStatus,
     onStatusChange: (PrayerStatus) -> Unit,
+    onStatusChangeWithTime: ((PrayerStatus, LocalTime?, Boolean) -> Unit)? = null, // Added isNextDay parameter
     showSheet: Boolean,
     sheetState: SheetState,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    prayerStartTime: LocalTime? = null,
+    prayerEndTime: LocalTime? = null,
+    nextDayFajrTime: LocalTime? = null // For Isha's next day validation
 ) {
+    var showTimePicker by remember { mutableStateOf(false) }
+    var pendingStatus by remember { mutableStateOf<PrayerStatus?>(null) }
+
+    val isIsha = prayerName.equals("Isha", ignoreCase = true)
+
     if (showSheet) {
         ModalBottomSheet(
             onDismissRequest = onDismiss,
@@ -57,11 +68,20 @@ fun PrayerStatusSelector(
                             isSelected = currentStatus == status,
                             onClick = {
                                 if (currentStatus == status) {
-                                    onStatusChange(PrayerStatus.EMPTY)
+                                    // Deselect - clear status
+                                    onStatusChangeWithTime?.invoke(PrayerStatus.EMPTY, null, false)
+                                        ?: onStatusChange(PrayerStatus.EMPTY)
+                                    onDismiss()
+                                } else if (status == PrayerStatus.PRAYED && onStatusChangeWithTime != null) {
+                                    // Show time picker for PRAYED status
+                                    pendingStatus = status
+                                    showTimePicker = true
                                 } else {
-                                    onStatusChange(status)
+                                    // For other statuses, just update without time
+                                    onStatusChangeWithTime?.invoke(status, null, false)
+                                        ?: onStatusChange(status)
+                                    onDismiss()
                                 }
-                                onDismiss()
                             },
                             modifier = Modifier.weight(1f)
                         )
@@ -71,5 +91,26 @@ fun PrayerStatusSelector(
             }
         }
     }
-}
 
+    if (showTimePicker && pendingStatus != null) {
+        TimePickerDialog(
+            initialTime = LocalTime.now(),
+            minTime = prayerStartTime,
+            maxTime = if (isIsha) null else prayerEndTime, // Isha has special handling
+            prayerName = prayerName,
+            isIshaWithNextDayOption = isIsha,
+            nextDayFajrTime = nextDayFajrTime,
+            onTimeSelected = { selectedTime, isNextDay ->
+                onStatusChangeWithTime?.invoke(pendingStatus!!, selectedTime, isNextDay)
+                    ?: onStatusChange(pendingStatus!!)
+                showTimePicker = false
+                pendingStatus = null
+                onDismiss()
+            },
+            onDismiss = {
+                showTimePicker = false
+                pendingStatus = null
+            }
+        )
+    }
+}

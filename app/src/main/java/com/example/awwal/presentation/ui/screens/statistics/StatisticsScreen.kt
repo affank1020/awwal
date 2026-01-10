@@ -20,7 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
-import com.example.awwal.presentation.ui.common.date.DateNavigator
+import com.example.awwal.presentation.ui.common.date.dateNavigator.DateNavigator
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDate
