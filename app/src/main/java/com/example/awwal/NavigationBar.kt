@@ -1,4 +1,4 @@
-package com.example.awwal.navigation
+package com.example.awwal
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun AppNavGraph() {
+fun NavigationBar() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     val myNavigationSuiteItemColors = NavigationSuiteDefaults.itemColors(

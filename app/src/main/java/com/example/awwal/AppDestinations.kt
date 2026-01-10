@@ -1,4 +1,4 @@
-package com.example.awwal.navigation
+package com.example.awwal
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
