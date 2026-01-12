@@ -3,6 +3,7 @@ package com.example.awwal.presentation.ui.common.dialogs.timePicker
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.awwal.presentation.ui.common.dialogs.Dialog
@@ -11,58 +12,23 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Time picker dialog with validation for prayer time windows.
- * Supports Isha's special case where the window extends past midnight to Fajr next day.
+ * Handles midnight crossing naturally for Isha prayers.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
     initialTime: LocalTime = LocalTime.now(),
     minTime: LocalTime? = null,
     maxTime: LocalTime? = null,
     prayerName: String = "",
-    isIshaWithNextDayOption: Boolean = false,
-    nextDayFajrTime: LocalTime? = null,
-    onTimeSelected: (LocalTime, Boolean) -> Unit,
+    onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var isNextDay by remember { mutableStateOf(false) }
-    var validationError by remember { mutableStateOf<String?>(null) }
-
-    // For isha, we may have next day option
-    val effectiveMinTime = if (isNextDay) LocalTime.MIDNIGHT else minTime
-    val effectiveMaxTime = if (isNextDay) nextDayFajrTime else maxTime
-
-    val timePickerState = rememberTimePickerState(
-        initialHour = initialTime.hour,
-        initialMinute = initialTime.minute,
-        is24Hour = false
-    )
+    var selectedTime by remember { mutableStateOf(minTime ?: initialTime) }
 
     val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 
     val onConfirm = {
-        val selectedTime = LocalTime.of(timePickerState.hour, timePickerState.minute)
-
-        // Validate time is within bounds
-        val isValid = if (isNextDay) {
-            // After midnight: must be before Fajr next day
-            nextDayFajrTime == null || selectedTime <= nextDayFajrTime
-        } else {
-            // Same day: must be within prayer window
-            val afterMin = effectiveMinTime == null || selectedTime >= effectiveMinTime
-            val beforeMax = effectiveMaxTime == null || selectedTime <= effectiveMaxTime
-            afterMin && beforeMax
-        }
-
-        if (isValid) {
-            onTimeSelected(selectedTime, isNextDay)
-        } else {
-            validationError = if (isNextDay) {
-                "Time must be before Fajr (${nextDayFajrTime?.format(formatter)})"
-            } else {
-                "Time must be within the prayer window"
-            }
-        }
+        onTimeSelected(selectedTime)
     }
 
     Dialog(
@@ -72,65 +38,78 @@ fun TimePickerDialog(
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Show day selector for Isha
-            if (isIshaWithNextDayOption) {
-                Text(
-                    text = "Select the day you prayed:",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = !isNextDay,
-                        onClick = { isNextDay = false; validationError = null },
-                        label = { Text("Same day") }
-                    )
-                    FilterChip(
-                        selected = isNextDay,
-                        onClick = { isNextDay = true; validationError = null },
-                        label = { Text("After midnight") }
-                    )
-                }
-
-                if (isNextDay && nextDayFajrTime != null) {
-                    Text(
-                        text = "Select a time between 12:00 AM and ${nextDayFajrTime.format(formatter)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
             // Show time window info
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                if (effectiveMinTime != null) {
-                    Text(
-                        text = "Start time: ${effectiveMinTime.format(formatter)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                if (minTime != null) {
+                    Column(horizontalAlignment = Alignment.Start) {
+                        Text(
+                            text = "Start",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = minTime.format(formatter),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-                if (effectiveMaxTime != null) {
-                    Text(
-                        text = "End time: ${effectiveMaxTime.format(formatter)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                if (maxTime != null) {
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "End",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = maxTime.format(formatter),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
-            TimePicker(state = timePickerState)
 
-            // Show validation error
-            if (validationError != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Circular time picker
+            if (minTime != null && maxTime != null) {
+                CircularTimePicker(
+                    startTime = minTime,
+                    endTime = maxTime,
+                    initialTime = minTime, // Always start at the beginning of the window
+                    onTimeChanged = { time ->
+                        selectedTime = time
+                    },
+                    modifier = Modifier.padding(16.dp),
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    progressColor = MaterialTheme.colorScheme.primary,
+                    handleColor = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                // Fallback if times are not available
                 Text(
-                    text = validationError!!,
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "Time window not available",
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Helper text
+            Text(
+                text = "Drag the handle around the circle to select the time you prayed",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
         }
     }
 }

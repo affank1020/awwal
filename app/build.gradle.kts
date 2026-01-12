@@ -45,6 +45,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.compose.ui.test)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

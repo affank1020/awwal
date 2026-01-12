@@ -27,10 +27,9 @@ fun PrayerItem(
     currentStatus: PrayerStatus = PrayerStatus.EMPTY,
     timePrayed: LocalTime? = null,
     onStatusChange: (PrayerStatus) -> Unit = {},
-    onStatusChangeWithTime: ((PrayerStatus, LocalTime?, Boolean) -> Unit)? = null, // Added isNextDay parameter
+    onStatusChangeWithTime: ((PrayerStatus, LocalTime?) -> Unit)? = null,
     prayerStartTime: LocalTime? = null,
-    prayerEndTime: LocalTime? = null,
-    nextDayFajrTime: LocalTime? = null // For Isha's next day validation
+    prayerEndTime: LocalTime? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -42,7 +41,7 @@ fun PrayerItem(
 
     val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 
-    // Determine what time text to show - changed "Starts at" to "Start time:"
+    // Determine what time text to show
     val timeDisplayText = when {
         currentStatus == PrayerStatus.PRAYED && timePrayed != null -> {
             "Prayed at ${timePrayed.format(formatter)}"
@@ -132,7 +131,6 @@ fun PrayerItem(
             }
         },
         prayerStartTime = prayerStartTime,
-        prayerEndTime = prayerEndTime,
-        nextDayFajrTime = nextDayFajrTime
+        prayerEndTime = prayerEndTime
     )
 }

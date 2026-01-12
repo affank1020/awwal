@@ -101,19 +101,17 @@ class PrayersViewModel(
 
     /**
      * Update prayer status with time prayed and calculate window percentage
-     * @param isNextDay If true, the time prayed is after midnight (for Isha prayers)
      */
     fun updatePrayerStatusWithTime(
         prayerName: String,
         date: LocalDate,
         newStatus: PrayerStatus,
-        timePrayed: LocalTime?,
-        isNextDay: Boolean = false
+        timePrayed: LocalTime?
     ) {
         viewModelScope.launch {
             try {
                 val windowPercentage = if (timePrayed != null && newStatus == PrayerStatus.PRAYED) {
-                    calculatePrayerWindowPercentage(prayerName, date, timePrayed, isNextDay)
+                    calculatePrayerWindowPercentage(prayerName, date, timePrayed)
                 } else null
 
                 val updatedPrayer = PrayerData(
@@ -133,13 +131,12 @@ class PrayersViewModel(
     /**
      * Calculate what percentage of the prayer window had elapsed when the user prayed
      * 0.0 = prayed at the start, 1.0 = prayed at the end of the window
-     * @param isNextDay If true, the time prayed is after midnight (for Isha prayers)
+     * Handles midnight crossing automatically for Isha prayers
      */
     private fun calculatePrayerWindowPercentage(
         prayerName: String,
         date: LocalDate,
-        timePrayed: LocalTime,
-        isNextDay: Boolean = false
+        timePrayed: LocalTime
     ): Float? {
         return try {
             val times = prayerTimesRepository.getPrayerTimesForDate(date)
@@ -165,8 +162,9 @@ class PrayersViewModel(
 
             if (windowDuration <= 0) return null
 
-            // Calculate elapsed duration
-            val elapsedDuration = if (isNextDay) {
+            // Calculate elapsed duration - detect midnight crossing by checking if timePrayed is before startTime
+            val isAfterMidnight = prayerName.equals("Isha", ignoreCase = true) && timePrayed < startTime
+            val elapsedDuration = if (isAfterMidnight) {
                 // Time is after midnight
                 val minutesToMidnight = Duration.between(startTime, LocalTime.MAX).toMinutes() + 1
                 val minutesAfterMidnight = Duration.between(LocalTime.MIDNIGHT, timePrayed).toMinutes()
