@@ -23,14 +23,12 @@ fun PrayersList(
     onStatusChange: (prayerName: String, newStatus: PrayerStatus) -> Unit,
     onStatusChangeWithTime: ((prayerName: String, newStatus: PrayerStatus, timePrayed: LocalTime?) -> Unit)? = null,
     modifier: Modifier = Modifier,
-    headerContent: (@Composable () -> Unit)? = null,
-    onScrollStateChanged: ((isAtTop: Boolean) -> Unit)? = null,
-    onOverscrollTop: (() -> Unit)? = null
+    headerContent: (@Composable () -> Unit)? = null
 ) {
     val formatter = DateTimeFormatter.ofPattern("hh:mm a")
-    val overscrollThreshold = 120f // dp
 
     LazyColumn(
+        modifier = modifier,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -39,14 +37,24 @@ fun PrayersList(
         }
         items(prayerNames) { prayerName ->
             val prayerData = prayerStatusMap[prayerName]
-            val startTime = prayerTimes[prayerName]?.let { try { LocalTime.parse(it, formatter) } catch (e: Exception) { null } }
+            val startTime = prayerTimes[prayerName]?.let {
+                try { LocalTime.parse(it, formatter) } catch (_: Exception) { null }
+            }
             val endTime = when (prayerName) {
-                "Fajr" -> prayerTimes["Sunrise"]?.let { try { LocalTime.parse(it, formatter) } catch (e: Exception) { null } }
-                "Isha" -> prayerTimes["Fajr"]?.let { try { LocalTime.parse(it, formatter) } catch (e: Exception) { null } }
+                "Fajr" -> prayerTimes["Sunrise"]?.let {
+                    try { LocalTime.parse(it, formatter) } catch (_: Exception) { null }
+                }
+                "Isha" -> prayerTimes["Fajr"]?.let {
+                    try { LocalTime.parse(it, formatter) } catch (_: Exception) { null }
+                }
                 else -> {
                     val idx = prayerNames.indexOf(prayerName)
                     val nextName = prayerNames.getOrNull(idx + 1)
-                    nextName?.let { prayerTimes[it]?.let { t -> try { LocalTime.parse(t, formatter) } catch (e: Exception) { null } } }
+                    nextName?.let {
+                        prayerTimes[it]?.let { t ->
+                            try { LocalTime.parse(t, formatter) } catch (_: Exception) { null }
+                        }
+                    }
                 }
             }
             PrayerItem(

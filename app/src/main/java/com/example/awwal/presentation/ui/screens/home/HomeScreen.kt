@@ -5,14 +5,18 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.PrayerData
 import com.example.awwal.domain.classes.enums.PrayerStatus
-import com.example.awwal.presentation.ui.common.date.dateNavigator.DateNavigator
+import com.example.awwal.presentation.ui.common.calendar.CalendarOverlay
 import com.example.awwal.presentation.ui.common.date.datePager.DatePagingState
 import com.example.awwal.presentation.ui.common.date.datePager.DatePager
 import com.example.awwal.presentation.ui.screens.home.components.PrayersList
@@ -20,6 +24,8 @@ import com.example.awwal.presentation.ui.screens.home.components.mainWidget.Main
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -52,9 +58,25 @@ fun HomeScreen(
 
     val prayerNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
     var calendarVisible by remember { mutableStateOf(false) }
-    var currentMonth by remember { mutableStateOf(java.time.YearMonth.now()) }
-    var isListAtTop by remember { mutableStateOf(true) }
+    var currentMonth by remember { mutableStateOf(YearMonth.now()) }
     val coroutineScope = rememberCoroutineScope()
+
+    // Load prayer data for visible month when calendar opens
+    LaunchedEffect(calendarVisible, currentMonth) {
+        if (calendarVisible) {
+            val firstDay = currentMonth.atDay(1)
+            val lastDay = currentMonth.atEndOfMonth()
+            var day = firstDay
+            while (!day.isAfter(lastDay)) {
+                if (!prayerCache.containsKey(day)) {
+                    viewModel.loadPrayersForDateIntoCache(day) { prayers ->
+                        prayerCache[day] = prayers
+                    }
+                }
+                day = day.plusDays(1)
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -69,13 +91,20 @@ fun HomeScreen(
                 )
             )
     ) {
+        var currentPage by remember { mutableIntStateOf(pagingState.todayPage) }
+        var capturedPagerState by remember { mutableStateOf<androidx.compose.foundation.pager.PagerState?>(null) }
+
         DatePager(
             totalPages = pagingState.totalPages,
             todayPage = pagingState.todayPage,
             pageToDate = { pagingState.pageToDate(it) },
             modifier = Modifier.fillMaxSize()
         ) { pageDate, page, pagerState ->
+            LaunchedEffect(pagerState) {
+                capturedPagerState = pagerState
+            }
             LaunchedEffect(page) {
+                currentPage = page
                 val currentDate = pagingState.pageToDate(page)
                 viewModel.loadPrayersForDate(currentDate)
                 val prevDate = pagingState.pageToDate((page - 1).coerceAtLeast(0))
@@ -97,6 +126,7 @@ fun HomeScreen(
                     prayerTimesCache[nextPageDate] = viewModel.getPrayerTimesForDate(nextPageDate)
                 }
             }
+
             val showPrayerTimes = page == pagingState.todayPage
             val pagePrayerTimes = if (showPrayerTimes) {
                 prayerTimesCache[pageDate] ?: viewModel.getPrayerTimesForDate(pageDate)
@@ -105,125 +135,133 @@ fun HomeScreen(
             }
             val pagePrayers = prayerCache[pageDate] ?: emptyList()
             val prayerStatusMap = pagePrayers.associateBy { it.prayerName }
+
             Column(Modifier.fillMaxSize()) {
-                DateNavigator(
-                    currentDate = pageDate,
-                    onPrevious = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage((page - 1).coerceAtLeast(0), animationSpec = tween(durationMillis = 500))
-                        }
-                    },
-                    onNext = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage((page + 1).coerceAtMost(pagingState.totalPages - 1), animationSpec = tween(durationMillis = 500))
-                        }
-                    },
-                    onDateSelected = { selectedDate ->
-                        val targetPage = pagingState.dateToPage(selectedDate).coerceIn(0, pagingState.totalPages - 1)
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(targetPage, animationSpec = tween(durationMillis = 500))
-                        }
-                    },
-                    futureDates = false,
-                    isToday = page == pagingState.todayPage
+                // Calendar button header
+                CalendarButtonHeader(
+                    onCalendarClick = { calendarVisible = true }
                 )
-                Box(Modifier.fillMaxSize()) {
-                    PrayersList(
-                        prayerNames = prayerNames,
-                        prayerTimes = pagePrayerTimes,
-                        prayerStatusMap = prayerStatusMap,
-                        onStatusChange = { prayerName, newStatus ->
-                            viewModel.updatePrayerStatus(
-                                prayerName = prayerName,
-                                date = pageDate,
-                                newStatus = newStatus
+
+                // Prayer list
+                PrayersList(
+                    prayerNames = prayerNames,
+                    prayerTimes = pagePrayerTimes,
+                    prayerStatusMap = prayerStatusMap,
+                    onStatusChange = { prayerName, newStatus ->
+                        viewModel.updatePrayerStatus(
+                            prayerName = prayerName,
+                            date = pageDate,
+                            newStatus = newStatus
+                        )
+                        updatePrayerCache(prayerCache, pageDate, prayerName, newStatus, null)
+                    },
+                    onStatusChangeWithTime = { prayerName, newStatus, timePrayed ->
+                        viewModel.updatePrayerStatusWithTime(
+                            prayerName = prayerName,
+                            date = pageDate,
+                            newStatus = newStatus,
+                            timePrayed = timePrayed
+                        )
+                        updatePrayerCache(prayerCache, pageDate, prayerName, newStatus, timePrayed)
+                    },
+                    modifier = Modifier.fillMaxSize(),
+                    headerContent = {
+                        if (page == pagingState.todayPage) {
+                            MainWidget(
+                                prayerNames = prayerNames,
+                                prayerTimes = pagePrayerTimes,
+                                prayerStatusMap = prayerStatusMap,
+                                currentDate = pageDate,
+                                onStatusChange = { prayerName, newStatus, timePrayed ->
+                                    viewModel.updatePrayerStatusWithTime(
+                                        prayerName = prayerName,
+                                        date = pageDate,
+                                        newStatus = newStatus,
+                                        timePrayed = timePrayed
+                                    )
+                                    updatePrayerCache(prayerCache, pageDate, prayerName, newStatus, timePrayed)
+                                },
+                                modifier = Modifier.padding(horizontal = 8.dp)
                             )
-                            val currentList = prayerCache[pageDate]?.toMutableList() ?: mutableListOf()
-                            val existingIndex = currentList.indexOfFirst { it.prayerName == prayerName }
-                            val updatedPrayer = PrayerData(
-                                prayerName = prayerName,
-                                date = pageDate,
-                                prayerStatus = newStatus,
-                                timePrayed = null,
-                                prayerWindowPercentage = null
-                            )
-                            if (existingIndex >= 0) {
-                                currentList[existingIndex] = updatedPrayer
-                            } else {
-                                currentList.add(updatedPrayer)
-                            }
-                            prayerCache[pageDate] = currentList
-                        },
-                        onStatusChangeWithTime = { prayerName, newStatus, timePrayed ->
-                            viewModel.updatePrayerStatusWithTime(
-                                prayerName = prayerName,
-                                date = pageDate,
-                                newStatus = newStatus,
-                                timePrayed = timePrayed
-                            )
-                            val currentList = prayerCache[pageDate]?.toMutableList() ?: mutableListOf()
-                            val existingIndex = currentList.indexOfFirst { it.prayerName == prayerName }
-                            val updatedPrayer = PrayerData(
-                                prayerName = prayerName,
-                                date = pageDate,
-                                prayerStatus = newStatus,
-                                timePrayed = timePrayed,
-                                prayerWindowPercentage = null
-                            )
-                            if (existingIndex >= 0) {
-                                currentList[existingIndex] = updatedPrayer
-                            } else {
-                                currentList.add(updatedPrayer)
-                            }
-                            prayerCache[pageDate] = currentList
-                        },
-                        modifier = Modifier.fillMaxSize(),
-                        onScrollStateChanged = { atTop ->
-                            isListAtTop = atTop
-                        },
-                        onOverscrollTop = {
-                            calendarVisible = true
-                        },
-                        headerContent = {
-                            if (page == pagingState.todayPage) {
-                                MainWidget(
-                                    prayerNames = prayerNames,
-                                    prayerTimes = pagePrayerTimes,
-                                    prayerStatusMap = prayerStatusMap,
-                                    currentDate = pageDate,
-                                    onStatusChange = { prayerName, newStatus, timePrayed ->
-                                        viewModel.updatePrayerStatusWithTime(
-                                            prayerName = prayerName,
-                                            date = pageDate,
-                                            newStatus = newStatus,
-                                            timePrayed = timePrayed
-                                        )
-                                        val currentList = prayerCache[pageDate]?.toMutableList() ?: mutableListOf()
-                                        val existingIndex = currentList.indexOfFirst { it.prayerName == prayerName }
-                                        val updatedPrayer = PrayerData(
-                                            prayerName = prayerName,
-                                            date = pageDate,
-                                            prayerStatus = newStatus,
-                                            timePrayed = timePrayed,
-                                            prayerWindowPercentage = null
-                                        )
-                                        if (existingIndex >= 0) {
-                                            currentList[existingIndex] = updatedPrayer
-                                        } else {
-                                            currentList.add(updatedPrayer)
-                                        }
-                                        prayerCache[pageDate] = currentList
-                                    },
-                                    modifier = Modifier.padding(horizontal = 8.dp)
-                                )
-                            }
                         }
-                    )
-                    if (calendarVisible) {
-                        // Example: CalendarOverlay(...)
                     }
-                }
+                )
             }
         }
+
+        // Calendar overlay - placed OUTSIDE DatePager so it overlays entire screen
+        CalendarOverlay(
+            visible = calendarVisible,
+            onDismiss = { calendarVisible = false },
+            currentMonth = currentMonth,
+            selectedDate = pagingState.pageToDate(currentPage),
+            prayerDataByDate = prayerCache.toMap(),
+            onDateSelected = { selectedDate ->
+                val targetPage = pagingState.dateToPage(selectedDate)
+                capturedPagerState?.let { pagerState ->
+                    coroutineScope.launch {
+                        pagerState.scrollToPage(targetPage)
+                    }
+                }
+                currentMonth = YearMonth.from(selectedDate)
+                calendarVisible = false
+            },
+            onMonthChanged = { newMonth -> currentMonth = newMonth }
+        )
     }
+}
+
+@Composable
+private fun CalendarButtonHeader(
+    onCalendarClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Calendar button - centered and transparent
+        OutlinedButton(
+            onClick = onCalendarClick,
+            shape = RoundedCornerShape(12.dp),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                contentColor = MaterialTheme.colorScheme.onSurface
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = "Open calendar",
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Calendar", style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
+private fun updatePrayerCache(
+    prayerCache: MutableMap<LocalDate, List<PrayerData>>,
+    pageDate: LocalDate,
+    prayerName: String,
+    newStatus: PrayerStatus,
+    timePrayed: LocalTime?
+) {
+    val currentList = prayerCache[pageDate]?.toMutableList() ?: mutableListOf()
+    val existingIndex = currentList.indexOfFirst { it.prayerName == prayerName }
+    val updatedPrayer = PrayerData(
+        prayerName = prayerName,
+        date = pageDate,
+        prayerStatus = newStatus,
+        timePrayed = timePrayed,
+        prayerWindowPercentage = null
+    )
+    if (existingIndex >= 0) {
+        currentList[existingIndex] = updatedPrayer
+    } else {
+        currentList.add(updatedPrayer)
+    }
+    prayerCache[pageDate] = currentList
 }

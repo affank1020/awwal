@@ -108,7 +108,6 @@ fun SettingsScreen(
                     readOnly = true,
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
                     modifier = Modifier
-                        .menuAnchor()
                         .fillMaxWidth()
                 )
                 ExposedDropdownMenu(
