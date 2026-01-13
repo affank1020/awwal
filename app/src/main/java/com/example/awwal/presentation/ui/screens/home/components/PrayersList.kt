@@ -1,11 +1,10 @@
 package com.example.awwal.presentation.ui.screens.home.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,15 +26,15 @@ fun PrayersList(
 ) {
     val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Column(
+        modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         if (headerContent != null) {
-            item { headerContent() }
+            headerContent()
         }
-        items(prayerNames) { prayerName ->
+
+        prayerNames.forEach { prayerName ->
             val prayerData = prayerStatusMap[prayerName]
             val startTime = prayerTimes[prayerName]?.let {
                 try { LocalTime.parse(it, formatter) } catch (_: Exception) { null }
@@ -74,8 +73,7 @@ fun PrayersList(
                 prayerEndTime = endTime
             )
         }
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

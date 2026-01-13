@@ -68,33 +68,33 @@ fun PrayerItem(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         border = BorderStroke(
-            width = 2.dp,
+            width = 1.5.dp,
             color = if (currentStatus != PrayerStatus.EMPTY) statusColor else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Prayer Name and Time
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = prayerName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 if (timeDisplayText.isNotBlank()) {
                     Text(
                         text = timeDisplayText,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodySmall,
                         color = if (currentStatus != PrayerStatus.EMPTY && currentStatus != PrayerStatus.MISSED) {
                             statusColor
                         } else {
@@ -106,13 +106,14 @@ fun PrayerItem(
             }
 
             IconButton(
-                onClick = { showSheet = true }
+                onClick = { showSheet = true },
+                modifier = Modifier.size(36.dp)
             ) {
                 Icon(
                     imageVector = statusIcon,
                     contentDescription = statusLabel,
                     tint = statusColor,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
