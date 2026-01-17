@@ -1,4 +1,4 @@
-package com.example.awwal.presentation.ui.screens.home.components.mainWidget
+package com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

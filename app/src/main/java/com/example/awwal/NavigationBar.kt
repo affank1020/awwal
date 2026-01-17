@@ -19,13 +19,16 @@ fun NavigationBar() {
 
     val myNavigationSuiteItemColors = NavigationSuiteDefaults.itemColors(
         navigationBarItemColors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.onPrimary
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
         ),
     )
 
     NavigationSuiteScaffold(
         navigationSuiteColors = NavigationSuiteDefaults.colors(
-            navigationBarContainerColor = Color.Transparent,
+            navigationBarContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            navigationBarContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
         navigationSuiteItems = {
             AppDestinations.entries.forEach {

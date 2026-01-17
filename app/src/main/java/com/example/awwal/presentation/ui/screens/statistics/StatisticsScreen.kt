@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.enums.PrayerStatus
+import com.example.awwal.presentation.ui.common.ScreenContainer
 import com.example.awwal.presentation.ui.common.date.dateNavigator.DateNavigator
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -47,31 +48,34 @@ fun StatisticsScreen(
         viewModel.loadPrayersForDate(currentDate)
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Statistics",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
 
-        DateNavigator(
-            currentDate = currentDate,
-            onPrevious = { currentDate = currentDate.minusDays(1) },
-            onNext = { currentDate = currentDate.plusDays(1) },
-            onDateSelected = { selectedDate -> currentDate = selectedDate },
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+    ScreenContainer(modifier) {
         Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            // Convert database prayers to display format
+            Text(
+                text = "Statistics",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            DateNavigator(
+                currentDate = currentDate,
+                onPrevious = { currentDate = currentDate.minusDays(1) },
+                onNext = { currentDate = currentDate.plusDays(1) },
+                onDateSelected = { selectedDate -> currentDate = selectedDate },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Convert database prayers to display format
+            }
         }
     }
 }

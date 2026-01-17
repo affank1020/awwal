@@ -2,41 +2,38 @@ package com.example.awwal.presentation.ui.screens.home
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.PrayerData
 import com.example.awwal.domain.classes.enums.PrayerStatus
+import com.example.awwal.presentation.ui.common.ScreenContainer
 import com.example.awwal.presentation.ui.common.calendar.CalendarBottomSheet
-import com.example.awwal.presentation.ui.common.date.datePager.DatePagingState
-import com.example.awwal.presentation.ui.screens.home.components.DateNavigationRow
-import com.example.awwal.presentation.ui.screens.home.components.PrayersList
-import com.example.awwal.presentation.ui.screens.home.components.mainWidget.MainWidget
+import com.example.awwal.presentation.ui.screens.home.components.widgets.dailyHadith.DailyHadithWidget
+import com.example.awwal.presentation.ui.screens.home.components.widgets.missedPrayers.MissedPrayersWidget
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.MainWidget
+import com.example.awwal.presentation.ui.screens.home.components.widgets.prayersList.PrayersWidget
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.YearMonth
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: PrayersViewModel = koinViewModel()
 ) {
-    val pagingState = remember { DatePagingState() }
+    // Shared caches for prayer data - needed for calendar and MainWidget
     val prayerCache = remember { mutableStateMapOf<LocalDate, List<PrayerData>>() }
     val prayerTimesCache = remember { mutableStateMapOf<LocalDate, Map<String, String>>() }
+
+    // Observe ViewModel state and sync to caches
     val prayersFromDb by viewModel.prayersForDate.collectAsState()
     val currentLoadedDate by viewModel.currentLoadedDate.collectAsState()
     val prayerTimesMap by viewModel.prayerTimesMap.collectAsState()
@@ -55,12 +52,10 @@ fun HomeScreen(
         }
     }
 
-    val prayerNames = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
+    // Calendar state
     var calendarVisible by remember { mutableStateOf(false) }
     var currentMonth by remember { mutableStateOf(YearMonth.now()) }
-    val coroutineScope = rememberCoroutineScope()
-
-    // Bottom sheet state for calendar
+    var selectedDateForCalendar by remember { mutableStateOf(LocalDate.now()) }
     val calendarSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     // Load prayer data for visible month when calendar opens
@@ -80,60 +75,14 @@ fun HomeScreen(
         }
     }
 
-    // Pager state for the prayers list
-    val pagerState = rememberPagerState(initialPage = pagingState.todayPage) { pagingState.totalPages }
-
-    // Track current date based on pager state
-    val currentDate by remember {
-        derivedStateOf { pagingState.pageToDate(pagerState.currentPage) }
-    }
-
-    // Load prayers when page changes
-    LaunchedEffect(pagerState.currentPage) {
-        val pageDate = pagingState.pageToDate(pagerState.currentPage)
-        viewModel.loadPrayersForDate(pageDate)
-
-        // Preload adjacent pages
-        val prevDate = pagingState.pageToDate((pagerState.currentPage - 1).coerceAtLeast(0))
-        val nextPageDate = pagingState.pageToDate((pagerState.currentPage + 1).coerceAtMost(pagingState.totalPages - 1))
-
-        if (!prayerCache.containsKey(prevDate)) {
-            viewModel.loadPrayersForDateIntoCache(prevDate) { prayers ->
-                prayerCache[prevDate] = prayers
-            }
-        }
-        if (!prayerCache.containsKey(nextPageDate)) {
-            viewModel.loadPrayersForDateIntoCache(nextPageDate) { prayers ->
-                prayerCache[nextPageDate] = prayers
-            }
-        }
-        if (!prayerTimesCache.containsKey(prevDate)) {
-            prayerTimesCache[prevDate] = viewModel.getPrayerTimesForDate(prevDate)
-        }
-        if (!prayerTimesCache.containsKey(nextPageDate)) {
-            prayerTimesCache[nextPageDate] = viewModel.getPrayerTimesForDate(nextPageDate)
-        }
-    }
-
-    // Get today's data for MainWidget
+    // Today's data for MainWidget
     val todayDate = LocalDate.now()
+    val prayerNames = remember { listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha") }
     val todayPrayerTimes = prayerTimesCache[todayDate] ?: viewModel.getPrayerTimesForDate(todayDate)
     val todayPrayers = prayerCache[todayDate] ?: emptyList()
     val todayPrayerStatusMap = todayPrayers.associateBy { it.prayerName }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.surface,
-                    ),
-                    startY = 1000f,
-                )
-            )
-    ) {
+    ScreenContainer(modifier) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -157,69 +106,43 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
 
-            // Date Navigation Row - clicking date opens calendar
-            DateNavigationRow(
-                currentDate = currentDate,
-                onPreviousDate = {
-                    coroutineScope.launch {
-                        val targetPage = (pagerState.currentPage - 1).coerceAtLeast(0)
-                        pagerState.animateScrollToPage(targetPage)
-                    }
-                },
-                onNextDate = {
-                    coroutineScope.launch {
-                        val targetPage = (pagerState.currentPage + 1).coerceAtMost(pagingState.todayPage)
-                        pagerState.animateScrollToPage(targetPage)
-                    }
-                },
-                onDateClick = {
-                    currentMonth = YearMonth.from(currentDate)
-                    calendarVisible = true
-                }
-            )
-
-            // Horizontal pager for just the PrayersList
-            HorizontalPager(
-                state = pagerState,
+            // Row of widgets: Missed Prayers and Daily Hadith
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(600.dp),
-                beyondViewportPageCount = 1
-            ) { page ->
-                val pageDate = pagingState.pageToDate(page)
-                val showPrayerTimes = page == pagingState.todayPage
-                val pagePrayerTimes = if (showPrayerTimes) {
-                    prayerTimesCache[pageDate] ?: viewModel.getPrayerTimesForDate(pageDate)
-                } else {
-                    emptyMap()
-                }
-                val pagePrayers = prayerCache[pageDate] ?: emptyList()
-                val prayerStatusMap = pagePrayers.associateBy { it.prayerName }
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Missed Prayers Widget (1 part)
+                MissedPrayersWidget(
+                    modifier = Modifier.weight(1f),
+                    missedCount = 0, // TODO: Connect to actual data
+                    onClick = { /* TODO: Navigate to missed prayers page */ }
+                )
 
-                PrayersList(
-                    prayerNames = prayerNames,
-                    prayerTimes = pagePrayerTimes,
-                    prayerStatusMap = prayerStatusMap,
-                    onStatusChange = { prayerName, newStatus ->
-                        viewModel.updatePrayerStatus(
-                            prayerName = prayerName,
-                            date = pageDate,
-                            newStatus = newStatus
-                        )
-                        updatePrayerCache(prayerCache, pageDate, prayerName, newStatus, null)
-                    },
-                    onStatusChangeWithTime = { prayerName, newStatus, timePrayed ->
-                        viewModel.updatePrayerStatusWithTime(
-                            prayerName = prayerName,
-                            date = pageDate,
-                            newStatus = newStatus,
-                            timePrayed = timePrayed
-                        )
-                        updatePrayerCache(prayerCache, pageDate, prayerName, newStatus, timePrayed)
-                    },
-                    modifier = Modifier.fillMaxSize()
+                // Daily Hadith Widget (3 parts)
+                DailyHadithWidget(
+                    modifier = Modifier.weight(3f),
+                    hadithText = "The best among you are those who have the best manners and character.",
+                    hadithSource = "Sahih Bukhari",
+                    onClick = { /* TODO: Expand or share hadith */ }
                 )
             }
+
+            // Prayers Widget - self-contained with its own pager and date navigation
+            PrayersWidget(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                viewModel = viewModel,
+                onDateClick = { date, month ->
+                    selectedDateForCalendar = date
+                    currentMonth = month
+                    calendarVisible = true
+                },
+                prayerCache = prayerCache,
+                prayerTimesCache = prayerTimesCache
+            )
         }
 
         // Calendar bottom sheet
@@ -227,13 +150,10 @@ fun HomeScreen(
             showSheet = calendarVisible,
             sheetState = calendarSheetState,
             currentMonth = currentMonth,
-            selectedDate = currentDate,
+            selectedDate = selectedDateForCalendar,
             prayerDataByDate = prayerCache.toMap(),
             onDateSelected = { selectedDate ->
-                val targetPage = pagingState.dateToPage(selectedDate)
-                coroutineScope.launch {
-                    pagerState.scrollToPage(targetPage)
-                }
+                selectedDateForCalendar = selectedDate
                 currentMonth = YearMonth.from(selectedDate)
                 calendarVisible = false
             },

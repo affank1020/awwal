@@ -1,4 +1,4 @@
-package com.example.awwal.presentation.ui.screens.home.components
+package com.example.awwal.presentation.ui.screens.home.components.widgets.prayersList
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,7 +27,8 @@ fun PrayersList(
     val formatter = DateTimeFormatter.ofPattern("hh:mm a")
 
     Column(
-        modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier = modifier
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         if (headerContent != null) {

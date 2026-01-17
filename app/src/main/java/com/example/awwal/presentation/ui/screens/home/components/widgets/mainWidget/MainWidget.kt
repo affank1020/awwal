@@ -1,4 +1,4 @@
-package com.example.awwal.presentation.ui.screens.home.components.mainWidget
+package com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -11,10 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.PrayerData
 import com.example.awwal.domain.classes.enums.PrayerStatus
@@ -23,11 +20,9 @@ import com.example.awwal.getSkyBackground
 import com.example.awwal.presentation.ui.common.contexts.getPrayerContext
 import com.example.awwal.presentation.ui.screens.home.components.prayer.PrayerStatusSelector
 import kotlinx.coroutines.delay
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

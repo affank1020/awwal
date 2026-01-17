@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.example.awwal.domain.classes.CalculationMethodType
 import com.example.awwal.domain.classes.MadhabType
 import com.example.awwal.domain.classes.enums.ThemeMode
+import com.example.awwal.presentation.ui.common.ScreenContainer
 import com.example.awwal.presentation.viewmodel.PrayerTimesSettingsViewModel
 import com.example.awwal.presentation.viewmodel.ThemeViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -46,100 +47,102 @@ fun SettingsScreen(
     val currentTheme by themeViewModel.themeState.collectAsState()
     val prayerSettings by prayerTimesSettingsViewModel.settings.collectAsState()
 
-    Column(
-        modifier = modifier
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        // Theme Settings Section
-        SettingsSection(title = "Theme Settings") {
-            ThemeOption(
-                text = "Light",
-                selected = currentTheme == ThemeMode.LIGHT,
-                onClick = { themeViewModel.updateTheme(ThemeMode.LIGHT) }
-            )
-            ThemeOption(
-                text = "Dark",
-                selected = currentTheme == ThemeMode.DARK,
-                onClick = { themeViewModel.updateTheme(ThemeMode.DARK) }
-            )
-            ThemeOption(
-                text = "System Default",
-                selected = currentTheme == ThemeMode.AUTO,
-                onClick = { themeViewModel.updateTheme(ThemeMode.AUTO) }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Prayer Times Settings Section
-        SettingsSection(title = "Prayer Times Settings") {
-            // Location
-            Text(
-                text = "Location",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            Text(
-                text = "Latitude: %.4f, Longitude: %.4f".format(
-                    prayerSettings.latitude,
-                    prayerSettings.longitude
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Calculation Method Dropdown
-            var methodExpanded by remember { mutableStateOf(false) }
-            Text(
-                text = "Calculation Method",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            ExposedDropdownMenuBox(
-                expanded = methodExpanded,
-                onExpandedChange = { methodExpanded = !methodExpanded }
-            ) {
-                OutlinedTextField(
-                    value = prayerSettings.calculationMethod.displayName,
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
+    ScreenContainer(modifier) {
+        Column(
+            modifier = modifier
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Theme Settings Section
+            SettingsSection(title = "Theme Settings") {
+                ThemeOption(
+                    text = "Light",
+                    selected = currentTheme == ThemeMode.LIGHT,
+                    onClick = { themeViewModel.updateTheme(ThemeMode.LIGHT) }
                 )
-                ExposedDropdownMenu(
-                    expanded = methodExpanded,
-                    onDismissRequest = { methodExpanded = false }
-                ) {
-                    CalculationMethodType.entries.forEach { method ->
-                        DropdownMenuItem(
-                            text = { Text(method.displayName) },
-                            onClick = {
-                                prayerTimesSettingsViewModel.updateCalculationMethod(method)
-                                methodExpanded = false
-                            }
-                        )
-                    }
-                }
+                ThemeOption(
+                    text = "Dark",
+                    selected = currentTheme == ThemeMode.DARK,
+                    onClick = { themeViewModel.updateTheme(ThemeMode.DARK) }
+                )
+                ThemeOption(
+                    text = "System Default",
+                    selected = currentTheme == ThemeMode.AUTO,
+                    onClick = { themeViewModel.updateTheme(ThemeMode.AUTO) }
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Madhab Selection
-            Text(
-                text = "Madhab (for Asr)",
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            MadhabType.entries.forEach { madhab ->
-                ThemeOption(
-                    text = madhab.displayName,
-                    selected = prayerSettings.madhab == madhab,
-                    onClick = { prayerTimesSettingsViewModel.updateMadhab(madhab) }
+            // Prayer Times Settings Section
+            SettingsSection(title = "Prayer Times Settings") {
+                // Location
+                Text(
+                    text = "Location",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
+                Text(
+                    text = "Latitude: %.4f, Longitude: %.4f".format(
+                        prayerSettings.latitude,
+                        prayerSettings.longitude
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Calculation Method Dropdown
+                var methodExpanded by remember { mutableStateOf(false) }
+                Text(
+                    text = "Calculation Method",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                ExposedDropdownMenuBox(
+                    expanded = methodExpanded,
+                    onExpandedChange = { methodExpanded = !methodExpanded }
+                ) {
+                    OutlinedTextField(
+                        value = prayerSettings.calculationMethod.displayName,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = methodExpanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = methodExpanded,
+                        onDismissRequest = { methodExpanded = false }
+                    ) {
+                        CalculationMethodType.entries.forEach { method ->
+                            DropdownMenuItem(
+                                text = { Text(method.displayName) },
+                                onClick = {
+                                    prayerTimesSettingsViewModel.updateCalculationMethod(method)
+                                    methodExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Madhab Selection
+                Text(
+                    text = "Madhab (for Asr)",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                MadhabType.entries.forEach { madhab ->
+                    ThemeOption(
+                        text = madhab.displayName,
+                        selected = prayerSettings.madhab == madhab,
+                        onClick = { prayerTimesSettingsViewModel.updateMadhab(madhab) }
+                    )
+                }
             }
         }
     }
