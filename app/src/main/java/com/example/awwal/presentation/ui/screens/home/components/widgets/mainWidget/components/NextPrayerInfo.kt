@@ -1,4 +1,4 @@
-package com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget
+package com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,6 @@ import java.time.Duration
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
 
 @Composable
 fun NextPrayerInfo(

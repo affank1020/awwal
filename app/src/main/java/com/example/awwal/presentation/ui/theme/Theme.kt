@@ -40,62 +40,60 @@ private val DarkColorScheme = darkColorScheme(
 
     // BLUE
 
-    primary = Color(0xFF4C7AA6)  ,        // Rich desaturated blue
-    onPrimary = Color(0xFF0B1A26),
-
-    primaryContainer = Color(0xFF1E3A55),
-    onPrimaryContainer = Color(0xFFD6E6F2),
-
-    secondary = Color(0xFF8FA7BF)      ,  // Cool steel blue
-    onSecondary = Color(0xFF10212E),
-
-    secondaryContainer = Color(0xFF2A3F52),
-    onSecondaryContainer = Color(0xFFDCE6EF),
-
-    tertiary = Color(0xFFC9A24D)     ,     // Muted gold
-    onTertiary = Color(0xFF2A1E05),
-
-    surface = Color(0xFF0E1620)      ,     // Deep navy background
-    onSurface = Color(0xFFE6EDF3),
-
-    surfaceVariant = Color(0xFF182331)  ,  // Card surfaces
-    onSurfaceVariant = Color(0xFFCBD5DF),
-
-    outline = Color(0xFF3B4A5C),
-    outlineVariant = Color(0xFF223040),
-
-    background = Color(0xFF080E15),    // Very deep navy-black
-    onBackground = Color(0xFFE6EDF3),   // Soft cool white
-
-
+//    primary = Color(0xFF4C7AA6)  ,        // Rich desaturated blue
+//    onPrimary = Color(0xFF0B1A26),
+//
+//    primaryContainer = Color(0xFF1E3A55),
+//    onPrimaryContainer = Color(0xFFD6E6F2),
+//
+//    secondary = Color(0xFF8FA7BF)      ,  // Cool steel blue
+//    onSecondary = Color(0xFF10212E),
+//
+//    secondaryContainer = Color(0xFF2A3F52),
+//    onSecondaryContainer = Color(0xFFDCE6EF),
+//
+//    tertiary = Color(0xFFC9A24D)     ,     // Muted gold
+//    onTertiary = Color(0xFF2A1E05),
+//
+//    surface = Color(0xFF0E1620)      ,     // Deep navy background
+//    onSurface = Color(0xFFE6EDF3),
+//
+//    surfaceVariant = Color(0xFF182331)  ,  // Card surfaces
+//    onSurfaceVariant = Color(0xFFCBD5DF),
+//
+//    outline = Color(0xFF3B4A5C),
+//    outlineVariant = Color(0xFF223040),
+//
+//    background = Color(0xFF080E15),    // Very deep navy-black
+//    onBackground = Color(0xFFE6EDF3),   // Soft cool white
 
             //GREEN
-//    primary = Color(0xFF6FAF8E)  ,        // Muted jade green
-//    onPrimary = Color(0xFF10241B),
-//
-//    primaryContainer = Color(0xFF2F5A46),
-//    onPrimaryContainer = Color(0xFFD8EFE4),
-//
-//    secondary = Color(0xFF9B8365)    ,    // Warm brown
-//    onSecondary = Color(0xFF2A1F14),
-//
-//    secondaryContainer = Color(0xFF3F3326),
-//    onSecondaryContainer = Color(0xFFE9DED1),
-//
-//    tertiary = Color(0xFFC6A25A)    ,      // Aged gold
-//    onTertiary = Color(0xFF2E2108),
-//
-//    surface = Color(0xFF121815)  ,         // Dark moss green
-//    onSurface = Color(0xFFE7ECE8),
-//
-//    surfaceVariant = Color(0xFF1C2621)  ,  // Elevated card green
-//    onSurfaceVariant = Color(0xFFC8D2CB),
-//
-//    outline = Color(0xFF3E4A43),
-//    outlineVariant = Color(0xFF26332C),
-//
-//    background = Color(0xFF0C1210)  ,   // Deep moss green-black
-//    onBackground = Color(0xFFE7ECE8)   // Soft neutral light
+    primary = Color(0xFF6FAF8E)  ,        // Muted jade green
+    onPrimary = Color(0xFF10241B),
+
+    primaryContainer = Color(0xFF2F5A46),
+    onPrimaryContainer = Color(0xFFD8EFE4),
+
+    secondary = Color(0xFF9B8365)    ,    // Warm brown
+    onSecondary = Color(0xFF2A1F14),
+
+    secondaryContainer = Color(0xFF3F3326),
+    onSecondaryContainer = Color(0xFFE9DED1),
+
+    tertiary = Color(0xFFC6A25A)    ,      // Aged gold
+    onTertiary = Color(0xFF2E2108),
+
+    surface = Color(0xFF121815)  ,         // Dark moss green
+    onSurface = Color(0xFFE7ECE8),
+
+    surfaceVariant = Color(0xFF1C2621)  ,  // Elevated card green
+    onSurfaceVariant = Color(0xFFC8D2CB),
+
+    outline = Color(0xFF3E4A43),
+    outlineVariant = Color(0xFF26332C),
+
+    background = Color(0xFF0C1210)  ,   // Deep moss green-black
+    onBackground = Color(0xFFE7ECE8)   // Soft neutral light
 
 
             //indigo

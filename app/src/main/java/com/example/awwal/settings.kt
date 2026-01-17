@@ -41,23 +41,13 @@ fun getPrayerLabels(currentStatus: PrayerStatus): String {
     }
 }
 
-fun getSkyBackground(prayerName: String): Brush {
-    return when (prayerName) {
-        "Fajr" -> Brush.verticalGradient(listOf(Color(0xFF011318), Color(0xFF01426C)), endY = 900f)
-        "Dhuhr" -> Brush.verticalGradient(listOf(Color(0xFF71E0F8), Color(0xFFFFF0A0)), endY = 450f)
-        "Asr" -> Brush.verticalGradient(listOf(Color(0xFFAFD3F3), Color(0xFFFFE96E)), endY = 400f)
-        "Maghrib" -> Brush.verticalGradient(listOf(Color(0xFFD53000), Color(0xFFF39211)), endY = 200f)
-        else -> Brush.verticalGradient(listOf(Color(0xFF020B23), Color(0xFF1A2154)))
-    }
-}
-
-fun getForegroundColor(prayerName: String): Color {
-    return when (prayerName) {
-        "Fajr" -> Color(0xFFE3F2FD)
-        "Dhuhr" -> Color(0xFF003B72)
-        "Asr" -> Color(0xFF935100)
-        "Maghrib" -> Color(0xFFFFF4E7)
-        "Isha" -> Color(0xFFB39DDB)
-        else -> Color.White
+fun getAccentColor(prayerName: String): Color {
+    return when (prayerName.lowercase()) {
+        "fajr" -> Color(0xFF7C4DFF)
+        "dhuhr" -> Color(0xFF2196F3)
+        "asr" -> Color(0xFFFF9800)
+        "maghrib" -> Color(0xFFE91E63)
+        "isha" -> Color(0xFF3F51B5)
+        else -> Color(0xFF7C4DFF)
     }
 }

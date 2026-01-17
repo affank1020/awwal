@@ -46,6 +46,7 @@ android {
 dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.compose.ui.test)
+    implementation(libs.androidx.ui.tooling.preview)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -62,6 +63,7 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+    debugImplementation(libs.androidx.ui.tooling)
     ksp(libs.androidx.room.compiler)
 
     // Koin for Dependency Injection

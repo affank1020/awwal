@@ -17,6 +17,8 @@ import com.example.awwal.domain.classes.PrayerData
 import com.example.awwal.domain.classes.enums.PrayerStatus
 import com.example.awwal.presentation.ui.common.Widget
 import com.example.awwal.presentation.ui.common.date.datePager.DatePagingState
+import com.example.awwal.presentation.ui.screens.home.components.widgets.prayersList.components.DateNavigationRow
+import com.example.awwal.presentation.ui.screens.home.components.widgets.prayersList.components.PrayersList
 import com.example.awwal.presentation.viewmodel.PrayersViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -89,7 +91,8 @@ fun PrayersWidget(
                 },
                 onNextDate = {
                     coroutineScope.launch {
-                        val targetPage = (pagerState.currentPage + 1).coerceAtMost(pagingState.todayPage)
+                        val targetPage =
+                            (pagerState.currentPage + 1).coerceAtMost(pagingState.todayPage)
                         pagerState.animateScrollToPage(targetPage)
                     }
                 },
@@ -124,7 +127,13 @@ fun PrayersWidget(
                             date = pageDate,
                             newStatus = newStatus
                         )
-                        updatePrayerCacheInternal(prayerCache, pageDate, prayerName, newStatus, null)
+                        updatePrayerCacheInternal(
+                            prayerCache,
+                            pageDate,
+                            prayerName,
+                            newStatus,
+                            null
+                        )
                     },
                     onStatusChangeWithTime = { prayerName, newStatus, timePrayed ->
                         viewModel.updatePrayerStatusWithTime(
@@ -133,7 +142,13 @@ fun PrayersWidget(
                             newStatus = newStatus,
                             timePrayed = timePrayed
                         )
-                        updatePrayerCacheInternal(prayerCache, pageDate, prayerName, newStatus, timePrayed)
+                        updatePrayerCacheInternal(
+                            prayerCache,
+                            pageDate,
+                            prayerName,
+                            newStatus,
+                            timePrayed
+                        )
                     },
                     modifier = Modifier.fillMaxSize()
                 )

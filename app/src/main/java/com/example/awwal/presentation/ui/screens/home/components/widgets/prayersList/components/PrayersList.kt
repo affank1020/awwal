@@ -1,4 +1,4 @@
-package com.example.awwal.presentation.ui.screens.home.components.widgets.prayersList
+package com.example.awwal.presentation.ui.screens.home.components.widgets.prayersList.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
