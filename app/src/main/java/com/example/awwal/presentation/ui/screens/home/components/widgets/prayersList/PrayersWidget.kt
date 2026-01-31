@@ -71,16 +71,6 @@ fun PrayersWidget(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Section Title
-            Text(
-                text = "Your Prayers",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-            )
-
-            // Date Navigation Row
             DateNavigationRow(
                 currentDate = currentDate,
                 onPreviousDate = {

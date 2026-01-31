@@ -19,46 +19,9 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PrayerStatusSection(
     state: MainWidgetUiState,
-    formatter: DateTimeFormatter,
     onMarkPrayerClick: () -> Unit
 ) {
-    if (state.hasPrayed) {
-        val prayedText = buildAnnotatedString {
-            append("Prayed ")
-            withStyle(style = SpanStyle(color = state.accentColor, fontWeight = FontWeight.Bold)) {
-                append(state.currentPrayerName)
-            }
-            if (state.timePrayed != null && state.currentStatus == PrayerStatus.PRAYED) {
-                append(" at ${state.timePrayed.format(formatter)}")
-            } else {
-                when (state.currentStatus) {
-                    PrayerStatus.JAMAAH -> append(" in Jamaah")
-                    PrayerStatus.LATE -> append(" late")
-                    else -> {}
-                }
-            }
-        }
-        Text(
-            text = prayedText,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
-        )
-    } else {
-        val promptText = buildAnnotatedString {
-            append("Have you prayed ")
-            withStyle(style = SpanStyle(color = state.accentColor, fontWeight = FontWeight.Bold)) {
-                append(state.currentPrayerName)
-            }
-            append("?")
-        }
-        Text(
-            text = promptText,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
-        )
-
+    if (!state.hasPrayed) {
         Button(
             onClick = onMarkPrayerClick,
             colors = ButtonDefaults.buttonColors(

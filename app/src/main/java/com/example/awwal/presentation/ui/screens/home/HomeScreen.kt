@@ -103,10 +103,23 @@ fun HomeScreen(
                     )
                     updatePrayerCache(prayerCache, todayDate, prayerName, newStatus, timePrayed)
                 },
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             )
 
-            // Row of widgets: Missed Prayers and Daily Hadith
+            // Prayers Widget - self-contained with its own pager and date navigation
+            PrayersWidget(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                viewModel = viewModel,
+                onDateClick = { date, month ->
+                    selectedDateForCalendar = date
+                    currentMonth = month
+                    calendarVisible = true
+                },
+                prayerCache = prayerCache,
+                prayerTimesCache = prayerTimesCache
+            )
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -128,21 +141,6 @@ fun HomeScreen(
                     onClick = { /* TODO: Expand or share hadith */ }
                 )
             }
-
-            // Prayers Widget - self-contained with its own pager and date navigation
-            PrayersWidget(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                viewModel = viewModel,
-                onDateClick = { date, month ->
-                    selectedDateForCalendar = date
-                    currentMonth = month
-                    calendarVisible = true
-                },
-                prayerCache = prayerCache,
-                prayerTimesCache = prayerTimesCache
-            )
         }
 
         // Calendar bottom sheet

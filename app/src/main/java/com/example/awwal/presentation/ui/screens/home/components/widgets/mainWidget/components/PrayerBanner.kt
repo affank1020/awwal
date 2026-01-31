@@ -7,11 +7,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.*
-import java.time.LocalDate
-import java.time.LocalTime
+import androidx.compose.ui.text.withStyle
+import com.example.awwal.domain.classes.enums.PrayerStatus
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.MainWidgetUiState
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.asr.AsrSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.asr.AsrSkyView
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.dhuhr.DhuhrSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.dhuhr.DhuhrSkyView
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.fajr.FajrSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.fajr.FajrSkyView
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.isha.IshaSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.isha.IshaSkyView
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.maghrib.MaghribSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.maghrib.MaghribSkyView
 import java.time.format.DateTimeFormatter
 
 /**
@@ -21,43 +32,64 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PrayerBanner(
     currentPrayerName: String,
-    currentDate: LocalDate,
-    currentTime: LocalTime,
+    state: MainWidgetUiState,
+    formatter: DateTimeFormatter,
     modifier: Modifier = Modifier,
-    showBirds: Boolean = true
 ) {
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-    val dateFormatter = DateTimeFormatter.ofPattern("EEE, d MMM")
 
-    val foregroundColor = getForegroundColor(currentPrayerName)
-
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
         // Render the appropriate sky based on prayer time
         when (currentPrayerName.lowercase()) {
-            "fajr" -> FajrSkyView(showBirds = showBirds)
-            "dhuhr" -> DhuhrSkyView(showBirds = showBirds)
-            "asr" -> AsrSkyView(showBirds = showBirds)
-            "maghrib" -> MaghribSkyView(showBirds = showBirds)
-            "isha" -> IshaSkyView(showBirds = false) // No birds at night
-            else -> DhuhrSkyView(showBirds = showBirds)
+            "fajr" -> FajrSkyView()
+            "dhuhr" -> DhuhrSkyView()
+            "asr" -> AsrSkyView()
+            "maghrib" -> MaghribSkyView()
+            "isha" -> IshaSkyView()
+            else -> DhuhrSkyView()
         }
 
-        // Date and Time overlay
-        Column(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(start = 16.dp, top = 16.dp)
-        ) {
+        if (state.hasPrayed) {
+            val prayedText = buildAnnotatedString {
+                append("Prayed ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(state.currentPrayerName)
+                }
+                if (state.timePrayed != null && state.currentStatus == PrayerStatus.PRAYED) {
+                    append(" at ${state.timePrayed.format(formatter)}")
+                } else {
+                    when (state.currentStatus) {
+                        PrayerStatus.JAMAAH -> append(" in Jamaah")
+                        PrayerStatus.LATE -> append(" late")
+                        else -> {}
+                    }
+                }
+            }
+
             Text(
-                text = currentDate.format(dateFormatter),
-                style = MaterialTheme.typography.titleMedium,
-                color = foregroundColor,
+                text = prayedText,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
+        } else {
+            val promptText = buildAnnotatedString {
+                append("Have you prayed ")
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Bold
+                    )
+                ) {
+                    append(state.currentPrayerName)
+                }
+                append("?")
+            }
             Text(
-                text = currentTime.format(timeFormatter),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = foregroundColor
+                text = promptText,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

@@ -27,9 +27,10 @@ fun NavigationBar() {
 
     NavigationSuiteScaffold(
         navigationSuiteColors = NavigationSuiteDefaults.colors(
-            navigationBarContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            navigationBarContainerColor = Color.Transparent,
             navigationBarContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
+        containerColor = MaterialTheme.colorScheme.background,
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
                 item(

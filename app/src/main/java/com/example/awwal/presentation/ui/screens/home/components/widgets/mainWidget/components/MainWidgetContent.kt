@@ -5,14 +5,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.MainWidgetUiState
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.asr.AsrSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.dhuhr.DhuhrSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.fajr.FajrSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.isha.IshaSky
+import com.example.awwal.presentation.ui.screens.home.components.widgets.mainWidget.components.skies.maghrib.MaghribSky
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -26,29 +29,33 @@ fun MainWidgetContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(18.dp))
-            .clip(RoundedCornerShape(18.dp))
     ) {
-        // Top Section: Prayer Banner
         PrayerBanner(
             currentPrayerName = state.currentPrayerName,
-            currentDate = state.currentDate,
-            currentTime = state.currentTime
+            state = state,
+            formatter = formatter,
         )
 
-        // Bottom Section: Content
+        val bgColour = when (state.currentPrayerName.lowercase()) {
+            "fajr" -> FajrSky.hillColor
+            "dhuhr" -> DhuhrSky.hillColor
+            "asr" -> AsrSky.hillColor
+            "maghrib" -> MaghribSky.hillColor
+            "isha" -> IshaSky.hillColor
+            else -> MaterialTheme.colorScheme.surface
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface)
-                .clip(RoundedCornerShape(bottomStart = 18.dp, bottomEnd = 18.dp))
+                .background(bgColour)
                 .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Prayer status section
             PrayerStatusSection(
                 state = state,
-                formatter = formatter,
                 onMarkPrayerClick = onMarkPrayerClick
             )
 

@@ -68,13 +68,13 @@ private val DarkColorScheme = darkColorScheme(
 //    onBackground = Color(0xFFE6EDF3),   // Soft cool white
 
             //GREEN
-    primary = Color(0xFF6FAF8E)  ,        // Muted jade green
+    primary = Color(0xFFF4FCD9)  ,        // Muted jade green
     onPrimary = Color(0xFF10241B),
 
-    primaryContainer = Color(0xFF2F5A46),
+    primaryContainer = Color(0xFFC5D8A4),
     onPrimaryContainer = Color(0xFFD8EFE4),
 
-    secondary = Color(0xFF9B8365)    ,    // Warm brown
+    secondary = Color(0xFFBB9981)    ,    // Warm brown
     onSecondary = Color(0xFF2A1F14),
 
     secondaryContainer = Color(0xFF3F3326),
@@ -83,16 +83,16 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = Color(0xFFC6A25A)    ,      // Aged gold
     onTertiary = Color(0xFF2E2108),
 
-    surface = Color(0xFF121815)  ,         // Dark moss green
+    surface = Color(0xFF001C0D),         // Dark moss green
     onSurface = Color(0xFFE7ECE8),
 
-    surfaceVariant = Color(0xFF1C2621)  ,  // Elevated card green
+    surfaceVariant = Color(0xFF324139),  // Elevated card green
     onSurfaceVariant = Color(0xFFC8D2CB),
 
     outline = Color(0xFF3E4A43),
     outlineVariant = Color(0xFF26332C),
 
-    background = Color(0xFF0C1210)  ,   // Deep moss green-black
+    background = Color(0xFF001800),   // Deep moss green-black
     onBackground = Color(0xFFE7ECE8)   // Soft neutral light
 
 

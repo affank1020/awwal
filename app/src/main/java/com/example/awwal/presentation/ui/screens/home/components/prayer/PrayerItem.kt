@@ -58,7 +58,7 @@ fun PrayerItem(
         prayerTime.isNotBlank() -> {
             "Start time: $prayerTime"
         }
-        else -> ""
+        else -> "Status not set"
     }
 
     Card(
@@ -92,18 +92,16 @@ fun PrayerItem(
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
-                if (timeDisplayText.isNotBlank()) {
-                    Text(
-                        text = timeDisplayText,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (currentStatus != PrayerStatus.EMPTY && currentStatus != PrayerStatus.MISSED) {
-                            statusColor
-                        } else {
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        },
-                        fontWeight = FontWeight.Medium
-                    )
-                }
+                Text(
+                    text = timeDisplayText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (currentStatus != PrayerStatus.EMPTY && currentStatus != PrayerStatus.MISSED) {
+                        statusColor
+                    } else {
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    },
+                    fontWeight = FontWeight.Medium
+                )
             }
 
             IconButton(
